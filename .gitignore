@@ -1,4 +1,8 @@
 venv/
 .env
 __pycache__/
-*.pycbackend/data/*.json
+*.pyc
+backend/data/*.json
+node_modules/
+dist/
+.DS_Store

@@ -1,11 +1,7 @@
 from __future__ import annotations
 
-import json
 import os
-import uuid
-from datetime import datetime
-from pathlib import Path
-from typing import Any
+from typing import Any, Dict, List, Optional
 
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
@@ -14,19 +10,20 @@ from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 
 from agents.pipeline import build_agent
+from agent_runner import run_agent_blueprint
+from agent_store import create_agent, delete_agent, get_agent, list_agents
 
 
 load_dotenv()
 os.environ.setdefault("AGENTFORGE_MOCK_MODE", "true")
 
-BASE_DIR = Path(__file__).resolve().parent
-DATA_FILE = BASE_DIR / "data" / "generated_agents.json"
 
 app = FastAPI(
     title="AgentForge Mock API",
-    description="Browser API for generating AgentForge agent blueprints in mock mode.",
-    version="1.0.0",
+    description="Browser API for generating, saving, and running AgentForge agent blueprints.",
+    version="1.2.0",
 )
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -48,35 +45,29 @@ class AgentResponse(BaseModel):
     goal: str
     frequency: str
     output_type: str
-    tools_needed: list[str]
-    tool_configurations: list[dict[str, Any]]
+    tools_needed: List[str]
+    tool_configurations: List[Dict[str, Any]]
     system_prompt: str
-    workflow_steps: list[dict[str, Any]]
-    memory_config: dict[str, Any]
-    validation_result: dict[str, Any]
+    workflow_steps: List[Dict[str, Any]]
+    memory_config: Dict[str, Any]
+    validation_result: Dict[str, Any]
     mode: str
 
 
-def load_saved_agents() -> list[dict[str, Any]]:
-    DATA_FILE.parent.mkdir(parents=True, exist_ok=True)
-
-    if not DATA_FILE.exists():
-        DATA_FILE.write_text("[]", encoding="utf-8")
-
-    try:
-        return json.loads(DATA_FILE.read_text(encoding="utf-8"))
-    except json.JSONDecodeError:
-        DATA_FILE.write_text("[]", encoding="utf-8")
-        return []
+class SaveAgentRequest(BaseModel):
+    name: Optional[str] = None
+    original_request: Optional[str] = None
+    agent: AgentResponse
 
 
-def save_agents_to_file(agents: list[dict[str, Any]]) -> None:
-    DATA_FILE.parent.mkdir(parents=True, exist_ok=True)
-    DATA_FILE.write_text(json.dumps(agents, indent=2), encoding="utf-8")
+def model_to_dict(model: BaseModel) -> Dict[str, Any]:
+    if hasattr(model, "model_dump"):
+        return model.model_dump()
+    return model.dict()
 
 
 @app.get("/")
-def home() -> dict[str, str]:
+def home() -> Dict[str, str]:
     return {
         "status": "ok",
         "service": "AgentForge Mock API",
@@ -119,46 +110,56 @@ def generate_agent(request: AgentRequest) -> AgentResponse:
     )
 
 
-@app.get("/agents")
-def get_saved_agents() -> dict[str, list[dict[str, Any]]]:
-    return {
-        "agents": load_saved_agents()
-    }
-
-
 @app.post("/agents/save")
-def save_generated_agent(agent: dict[str, Any]) -> dict[str, Any]:
-    agents = load_saved_agents()
+def save_agent(request: SaveAgentRequest) -> Dict[str, Any]:
+    agent_data = model_to_dict(request.agent)
 
-    saved_agent = {
-        "id": str(uuid.uuid4()),
-        "created_at": datetime.utcnow().isoformat(),
-        "agent": agent,
-    }
+    saved_agent = create_agent(
+        {
+            "name": request.name or agent_data.get("goal") or "Untitled Agent",
+            "original_request": request.original_request,
+            **agent_data,
+        }
+    )
 
-    agents.append(saved_agent)
-    save_agents_to_file(agents)
+    return saved_agent
 
-    return {
-        "message": "Agent saved successfully",
-        "saved_agent": saved_agent,
-    }
+
+@app.get("/agents")
+def get_saved_agents() -> List[Dict[str, Any]]:
+    return list_agents()
+
+
+@app.get("/agents/{agent_id}")
+def get_saved_agent(agent_id: str) -> Dict[str, Any]:
+    agent = get_agent(agent_id)
+
+    if agent is None:
+        raise HTTPException(status_code=404, detail="Agent not found.")
+
+    return agent
+
+
+@app.post("/agents/{agent_id}/run")
+def run_saved_agent(agent_id: str) -> Dict[str, Any]:
+    agent = get_agent(agent_id)
+
+    if agent is None:
+        raise HTTPException(status_code=404, detail="Agent not found.")
+
+    return run_agent_blueprint(agent)
 
 
 @app.delete("/agents/{agent_id}")
-def delete_saved_agent(agent_id: str) -> dict[str, Any]:
-    agents = load_saved_agents()
+def remove_saved_agent(agent_id: str) -> Dict[str, Any]:
+    deleted = delete_agent(agent_id)
 
-    updated_agents = [agent for agent in agents if agent.get("id") != agent_id]
-
-    if len(updated_agents) == len(agents):
-        raise HTTPException(status_code=404, detail="Agent not found")
-
-    save_agents_to_file(updated_agents)
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Agent not found.")
 
     return {
-        "message": "Agent deleted successfully",
-        "deleted_agent_id": agent_id,
+        "deleted": True,
+        "id": agent_id,
     }
 
 
@@ -170,9 +171,9 @@ def ui() -> str:
         <title>AgentForge Mock UI</title>
       </head>
       <body>
-        <h1>AgentForge Mock API</h1>
-        <p>Backend is running.</p>
-        <p>Use the React frontend at http://localhost:5173</p>
+        <h1>AgentForge Mock UI</h1>
+        <p>Use the React frontend for the full generate + save + run experience.</p>
+        <p>API docs are available at <a href="/docs">/docs</a>.</p>
       </body>
     </html>
     """
