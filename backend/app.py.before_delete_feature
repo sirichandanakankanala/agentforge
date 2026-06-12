@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Any
 
 from dotenv import load_dotenv
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
@@ -142,23 +142,6 @@ def save_generated_agent(agent: dict[str, Any]) -> dict[str, Any]:
     return {
         "message": "Agent saved successfully",
         "saved_agent": saved_agent,
-    }
-
-
-@app.delete("/agents/{agent_id}")
-def delete_saved_agent(agent_id: str) -> dict[str, Any]:
-    agents = load_saved_agents()
-
-    updated_agents = [agent for agent in agents if agent.get("id") != agent_id]
-
-    if len(updated_agents) == len(agents):
-        raise HTTPException(status_code=404, detail="Agent not found")
-
-    save_agents_to_file(updated_agents)
-
-    return {
-        "message": "Agent deleted successfully",
-        "deleted_agent_id": agent_id,
     }
 
 
