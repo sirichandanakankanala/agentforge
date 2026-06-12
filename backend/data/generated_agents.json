@@ -1,0 +1,117 @@
+[
+  {
+    "id": "ea9d1950-f4d6-4abf-b70e-01183d26e1a6",
+    "created_at": "2026-06-12T16:28:10.165875",
+    "agent": {
+      "goal": "create an agents that give me weather updates\n",
+      "frequency": "on-demand",
+      "output_type": "structured response",
+      "tools_needed": [
+        "input_analyzer",
+        "task_planner",
+        "response_generator"
+      ],
+      "tool_configurations": [
+        {
+          "name": "input_analyzer",
+          "purpose": "handle input analyzer related operations for the agent goal.",
+          "config": {
+            "mode": "mock",
+            "requires_api_key": false,
+            "timeout_seconds": 30,
+            "retry_count": 2
+          }
+        },
+        {
+          "name": "task_planner",
+          "purpose": "handle task planner related operations for the agent goal.",
+          "config": {
+            "mode": "mock",
+            "requires_api_key": false,
+            "timeout_seconds": 30,
+            "retry_count": 2
+          }
+        },
+        {
+          "name": "response_generator",
+          "purpose": "handle response generator related operations for the agent goal.",
+          "config": {
+            "mode": "mock",
+            "requires_api_key": false,
+            "timeout_seconds": 30,
+            "retry_count": 2
+          }
+        }
+      ],
+      "system_prompt": "You are a specialized AI agent created by AgentForge.\n\nYour goal:\ncreate an agents that give me weather updates\n\n\nExecution frequency:\non-demand\n\nExpected output type:\nstructured response\n\nAvailable tools:\n- input_analyzer: handle input analyzer related operations for the agent goal.\n- task_planner: handle task planner related operations for the agent goal.\n- response_generator: handle response generator related operations for the agent goal.\n\nOperating instructions:\n1. Understand the user's request clearly before acting.\n2. Use the available tools only when they are relevant to the goal.\n3. Produce a clear, useful, and well-structured final output.\n4. Keep the response professional, concise, and practical.\n5. If required information is missing, state the assumption clearly instead of failing silently.\n\nThis is running in mock mode, so tool behavior is simulated and no external API key is required.",
+      "workflow_steps": [
+        {
+          "step_number": 1,
+          "name": "Understand User Objective",
+          "description": "Read the user request and identify the main goal: create an agents that give me weather updates\n",
+          "tool": "internal_reasoning"
+        },
+        {
+          "step_number": 2,
+          "name": "Use input_analyzer",
+          "description": "Use input_analyzer to handle input analyzer related operations for the agent goal.",
+          "tool": "input_analyzer"
+        },
+        {
+          "step_number": 3,
+          "name": "Use response_generator",
+          "description": "Use response_generator to handle response generator related operations for the agent goal.",
+          "tool": "response_generator"
+        },
+        {
+          "step_number": 4,
+          "name": "Use task_planner",
+          "description": "Use task_planner to handle task planner related operations for the agent goal.",
+          "tool": "task_planner"
+        },
+        {
+          "step_number": 5,
+          "name": "Generate Final Output",
+          "description": "Prepare the final response in the required output format.",
+          "tool": "response_generator"
+        }
+      ],
+      "memory_config": {
+        "short_term": [
+          {
+            "key": "current_user_request",
+            "description": "Stores the current user request during one execution of the agent.",
+            "retention_days": 1
+          },
+          {
+            "key": "intermediate_results",
+            "description": "Stores temporary outputs from workflow steps before final response generation.",
+            "retention_days": 1
+          }
+        ],
+        "long_term": [
+          {
+            "key": "successful_workflows",
+            "description": "Stores successful workflow patterns for improving future agent runs.",
+            "retention_days": 30
+          },
+          {
+            "key": "user_output_preferences",
+            "description": "Stores stable user preferences about response format and output style.",
+            "retention_days": 90
+          }
+        ],
+        "storage_type": "postgresql"
+      },
+      "validation_result": {
+        "passed": true,
+        "score": 100,
+        "issues": [],
+        "recommendations": [
+          "Generated agent blueprint is ready for MVP execution."
+        ]
+      },
+      "mode": "true"
+    }
+  }
+]
