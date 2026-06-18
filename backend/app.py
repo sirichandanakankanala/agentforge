@@ -177,3 +177,20 @@ def ui() -> str:
       </body>
     </html>
     """
+
+
+@app.post("/agents/{agent_id}/run")
+def run_saved_agent(agent_id: str) -> dict[str, Any]:
+    agents = load_saved_agents()
+
+    saved_agent = next(
+        (agent for agent in agents if agent.get("id") == agent_id),
+        None,
+    )
+
+    if saved_agent is None:
+        raise HTTPException(status_code=404, detail="Agent not found")
+
+    from agents.mock_runner import run_mock_agent
+
+    return run_mock_agent(saved_agent)
