@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import os
 from typing import Any, Dict, List, Optional
-
+from registry_updater import update_agent_after_run
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, Response
 from fastapi.middleware.cors import CORSMiddleware
@@ -11,7 +11,7 @@ from pydantic import BaseModel
 
 from agent_runner import run_agent_blueprint
 from agent_store import create_agent, delete_agent, get_agent, list_agents
-
+from run_store import create_run, list_runs, list_runs_for_agent
 
 load_dotenv()
 os.environ.setdefault("AGENTFORGE_MOCK_MODE", "true")
@@ -310,8 +310,32 @@ def run_agent(agent_id: str) -> Dict[str, Any]:
     if agent is None:
         raise HTTPException(status_code=404, detail="Agent not found.")
 
-    return run_agent_blueprint(agent)
+    run_result = run_agent_blueprint(agent)
 
+    update_agent_after_run(
+        agent_id=agent_id,
+        evaluation=run_result.get("evaluation", {}),
+        evolution=run_result.get("evolution", {}),
+    )
+
+    saved_run = create_run(agent_id, run_result)
+
+    return saved_run
+
+
+@app.get("/runs")
+def get_all_runs() -> List[Dict[str, Any]]:
+    return list_runs()
+
+
+@app.get("/agents/{agent_id}/runs")
+def get_agent_runs(agent_id: str) -> List[Dict[str, Any]]:
+    agent = get_agent(agent_id)
+
+    if agent is None:
+        raise HTTPException(status_code=404, detail="Agent not found.")
+
+    return list_runs_for_agent(agent_id)
 
 @app.delete("/agents/{agent_id}")
 def remove_agent(agent_id: str) -> Dict[str, Any]:
