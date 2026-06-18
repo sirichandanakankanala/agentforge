@@ -5,6 +5,7 @@ from typing import Any, Dict, List
 from uuid import uuid4
 
 from evaluator import evaluate_agent_run
+from evolution_engine import suggest_agent_improvements
 
 
 def now_utc() -> str:
@@ -56,7 +57,9 @@ def run_agent_blueprint(agent: Dict[str, Any]) -> Dict[str, Any]:
     output_type = agent.get("output_type", "structured response")
 
     tool_results = [fake_tool_output(tool, goal) for tool in tools]
+
     evaluation = evaluate_agent_run(agent, tool_results)
+    evolution = suggest_agent_improvements(agent, evaluation)
 
     return {
         "run_id": str(uuid4()),
@@ -68,15 +71,17 @@ def run_agent_blueprint(agent: Dict[str, Any]) -> Dict[str, Any]:
         "used_tools": tools,
         "tool_results": tool_results,
         "evaluation": evaluation,
+        "evolution": evolution,
         "output": {
             "title": f"Mock run result for: {goal}",
             "output_type": output_type,
-            "message": "The saved agent blueprint was loaded, executed in mock mode, and evaluated.",
+            "message": "The saved agent blueprint was loaded, executed in mock mode, evaluated, and passed to the Evolution Engine.",
             "key_points": [
                 "Saved agent was found.",
                 "Workflow was simulated.",
                 "Tool calls were mocked.",
                 "Evaluation Agent scored the run.",
+                "Evolution Engine generated improvement suggestions.",
                 "Final result was generated.",
             ],
             "evaluation_summary": {
@@ -84,7 +89,12 @@ def run_agent_blueprint(agent: Dict[str, Any]) -> Dict[str, Any]:
                 "verdict": evaluation["verdict"],
                 "feedback": evaluation["feedback"],
             },
-            "next_upgrade": "Connect this evaluation result to an Evolution Engine that improves weak agents.",
+            "evolution_summary": {
+                "action": evolution["action"],
+                "suggestions": evolution["suggestions"],
+                "auto_modified": evolution["auto_modified"],
+            },
+            "next_upgrade": "Store Evolution Engine suggestions in the Agent Registry for future agent improvement.",
         },
         "logs": [
             "Loaded saved agent blueprint.",
@@ -92,5 +102,6 @@ def run_agent_blueprint(agent: Dict[str, Any]) -> Dict[str, Any]:
             "Executed mock tools.",
             "Generated final output.",
             "Evaluation Agent scored the result.",
+            "Evolution Engine suggested improvements.",
         ],
     }
