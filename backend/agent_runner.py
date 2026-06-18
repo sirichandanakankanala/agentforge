@@ -4,6 +4,8 @@ from datetime import datetime
 from typing import Any, Dict, List
 from uuid import uuid4
 
+from evaluator import evaluate_agent_run
+
 
 def now_utc() -> str:
     return datetime.utcnow().isoformat() + "Z"
@@ -54,6 +56,7 @@ def run_agent_blueprint(agent: Dict[str, Any]) -> Dict[str, Any]:
     output_type = agent.get("output_type", "structured response")
 
     tool_results = [fake_tool_output(tool, goal) for tool in tools]
+    evaluation = evaluate_agent_run(agent, tool_results)
 
     return {
         "run_id": str(uuid4()),
@@ -64,22 +67,30 @@ def run_agent_blueprint(agent: Dict[str, Any]) -> Dict[str, Any]:
         "completed_at": now_utc(),
         "used_tools": tools,
         "tool_results": tool_results,
+        "evaluation": evaluation,
         "output": {
             "title": f"Mock run result for: {goal}",
             "output_type": output_type,
-            "message": "The saved agent blueprint was loaded and executed in mock mode.",
+            "message": "The saved agent blueprint was loaded, executed in mock mode, and evaluated.",
             "key_points": [
                 "Saved agent was found.",
                 "Workflow was simulated.",
                 "Tool calls were mocked.",
+                "Evaluation Agent scored the run.",
                 "Final result was generated.",
             ],
-            "next_upgrade": "Connect real tools like web search, Gmail, Slack, LinkedIn, calendar, or notification APIs.",
+            "evaluation_summary": {
+                "final_score": evaluation["final_score"],
+                "verdict": evaluation["verdict"],
+                "feedback": evaluation["feedback"],
+            },
+            "next_upgrade": "Connect this evaluation result to an Evolution Engine that improves weak agents.",
         },
         "logs": [
             "Loaded saved agent blueprint.",
             "Read selected tools.",
             "Executed mock tools.",
             "Generated final output.",
+            "Evaluation Agent scored the result.",
         ],
     }
