@@ -100,8 +100,8 @@ def run_agent_blueprint(agent: Dict[str, Any]) -> Dict[str, Any]:
             "Loaded saved agent blueprint.",
             "Read selected tools.",
             "Executed mock tools.",
-            "Generated final output.",
             "Evaluation Agent scored the result.",
             "Evolution Engine suggested improvements.",
+            "Generated final output.",
         ],
     }
