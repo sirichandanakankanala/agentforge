@@ -65,6 +65,46 @@ def update_agent_after_run(
                 }
 
                 agent["last_run_at"] = now_utc()
+                # Attempt simple automatic modifications when safe
+                try:
+                    auto_apply = evolution.get("auto_apply", False) or evolution.get("auto_modified", False)
+                    # If action suggests improvement and auto_apply requested, make minimal safe changes
+                    if evolution.get("action") in ("improve_agent", "IMPROVE", "improve") and not agent["latest_evolution"].get("auto_modified"):
+                        suggestions = evolution.get("suggestions", []) or []
+                        modified = False
+
+                        # If no tools, add conservative defaults
+                        if not agent.get("tools_needed"):
+                            agent.setdefault("tools_needed", [])
+                            agent.setdefault("tool_configurations", [])
+                            # conservative default tools
+                            for default_tool in ["web_search", "summarizer"]:
+                                if default_tool not in agent["tools_needed"]:
+                                    agent["tools_needed"].append(default_tool)
+                                    agent["tool_configurations"].append({
+                                        "tool": default_tool,
+                                        "mode": "mock",
+                                        "requires_api_key": False,
+                                        "status": "auto_added",
+                                    })
+                                    modified = True
+
+                        # If prompts should be improved, append a clarifying sentence
+                        for s in suggestions:
+                            lower = s.lower()
+                            if "improve the system prompt" in lower or "make the agent goal more specific" in lower:
+                                sp = agent.get("system_prompt", "")
+                                addition = "\n\n[Auto-Upgrade] Clarify: make the goal explicit and include success criteria."
+                                agent["system_prompt"] = (sp or "") + addition
+                                modified = True
+
+                        if modified and auto_apply:
+                            agent["latest_evolution"]["auto_modified"] = True
+                            evolution["auto_modified"] = True
+                        
+                except Exception:
+                    # Non-fatal - don't block writing the main file
+                    pass
                 updated = True
                 break
 

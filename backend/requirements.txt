@@ -2,6 +2,31 @@ fastapi
 uvicorn[standard]
 pydantic
 python-dotenv
-langgraph
+# langgraph  # commented out: not available on PyPI in many environments — enable manually if needed
 langchain
-langchain-openai
+# langchain-openai  # removed: not available on PyPI; add provider-specific client (e.g. `openai`) if needed
+psycopg2-binary
+
+# Testing
+pytest>=7.4.0
+pytest-asyncio>=0.21.0
+pytest-cov>=4.1.0
+
+# Async HTTP client
+httpx>=0.24.0
+
+# Job scheduling
+apscheduler>=3.10.4
+
+# API documentation
+python-multipart>=0.0.6
+
+# Performance & monitoring
+prometheus-client>=0.17.0
+
+# Streamlit UI
+streamlit>=1.26.0
+
+# WebSocket client for streaming (optional)
+websocket-client>=1.6.3
+

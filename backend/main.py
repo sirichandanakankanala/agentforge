@@ -12,9 +12,19 @@ from pydantic import BaseModel
 from agent_runner import run_agent_blueprint
 from agent_store import create_agent, delete_agent, get_agent, list_agents
 from run_store import create_run, list_runs, list_runs_for_agent
+from logger import get_logger
+from error_handler import handle_errors, monitor_performance
+from scheduler import get_agent_scheduler
+from memory import get_memory_manager
+from tools import get_tool_registry, MockWebSearchTool, MockNotificationSenderTool, MockSummarizerTool
+from ws_manager import get_ws_manager
+from fastapi import WebSocket, WebSocketDisconnect
 
 load_dotenv()
 os.environ.setdefault("AGENTFORGE_MOCK_MODE", "true")
+
+# Initialize logging
+logger = get_logger("main")
 
 
 PIPELINE_IMPORT_ERROR: Optional[str] = None
@@ -29,7 +39,7 @@ except Exception as error:
 app = FastAPI(
     title="AgentForge API",
     description="Generate, save, run, and export AI agent blueprints.",
-    version="1.3.0",
+    version="1.4.0",
 )
 
 
@@ -40,6 +50,40 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+# Initialize systems
+@app.on_event("startup")
+async def startup_event():
+    """Initialize backend systems on startup."""
+    logger.info("Starting AgentForge backend...")
+    
+    # Initialize tool registry
+    registry = get_tool_registry()
+    registry.register(MockWebSearchTool())
+    registry.register(MockNotificationSenderTool())
+    registry.register(MockSummarizerTool())
+    logger.info(f"Registered {len(registry.list_tools())} mock tools")
+    
+    # Start scheduler
+    scheduler = get_agent_scheduler()
+    scheduler.start()
+    logger.info("Agent scheduler started")
+    
+    # Initialize memory manager
+    memory_manager = get_memory_manager()
+    logger.info("Memory manager initialized")
+    
+    logger.info("✅ Backend startup complete")
+
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    """Clean up on shutdown."""
+    logger.info("Shutting down AgentForge backend...")
+    scheduler = get_agent_scheduler()
+    scheduler.stop()
+    logger.info("✅ Backend shutdown complete")
 
 
 class AgentRequest(BaseModel):
@@ -209,13 +253,21 @@ def root() -> Dict[str, Any]:
 
 
 @app.get("/health")
+@monitor_performance(threshold_ms=100)
 def health() -> Dict[str, Any]:
+    registry = get_tool_registry()
+    scheduler = get_agent_scheduler()
+    
     return {
         "status": "healthy",
         "backend": "running",
+        "version": "1.4.0",
         "mock_mode": os.getenv("AGENTFORGE_MOCK_MODE", "true"),
         "pipeline_available": build_agent is not None,
         "pipeline_import_error": PIPELINE_IMPORT_ERROR,
+        "tools_registered": len(registry.list_tools()),
+        "scheduler_running": scheduler.scheduler.running,
+        "scheduled_agents": len(scheduler.list_schedules()),
     }
 
 
@@ -337,6 +389,47 @@ def get_agent_runs(agent_id: str) -> List[Dict[str, Any]]:
 
     return list_runs_for_agent(agent_id)
 
+
+@app.websocket("/ws/agents/{agent_id}/run")
+async def websocket_run_agent(websocket: WebSocket, agent_id: str):
+    """Run an agent and stream progress over WebSocket."""
+    ws = get_ws_manager()
+    await ws.connect(agent_id, websocket)
+
+    try:
+        agent = get_agent(agent_id)
+        if not agent:
+            await websocket.send_json({"error": "Agent not found"})
+            return
+
+        # define progress callback
+        def progress_cb(evt: dict):
+            # send as JSON; ensure non-async callback wraps sending
+            try:
+                # best-effort: use create_task to avoid blocking
+                import asyncio as _asyncio
+
+                # include the agent_id key so the WebSocketManager can route messages
+                _asyncio.create_task(ws.send_json(agent_id, {"type": "progress", "data": evt}))
+            except Exception:
+                pass
+
+        # run agent synchronously but stream via callback
+        result = run_agent_blueprint(agent, progress_callback=progress_cb)
+
+        # send final result (route to this agent's connections)
+        await ws.send_json(agent_id, {"type": "complete", "data": result})
+
+    except WebSocketDisconnect:
+        ws.disconnect(agent_id, websocket)
+    except Exception as e:
+        try:
+            await websocket.send_json({"type": "error", "message": str(e)})
+        except Exception:
+            pass
+    finally:
+        ws.disconnect(agent_id, websocket)
+
 @app.delete("/agents/{agent_id}")
 def remove_agent(agent_id: str) -> Dict[str, Any]:
     deleted = delete_agent(agent_id)
@@ -347,4 +440,198 @@ def remove_agent(agent_id: str) -> Dict[str, Any]:
     return {
         "deleted": True,
         "id": agent_id,
+    }
+
+
+# ============================================================================
+# NEW ROUTES: Tools, Memory, and Scheduling
+# ============================================================================
+
+@app.get("/tools")
+@monitor_performance(threshold_ms=100)
+def list_tools() -> Dict[str, Any]:
+    """List all available tools."""
+    registry = get_tool_registry()
+    tools = registry.list_tools()
+    
+    return {
+        "tools": [
+            {
+                "name": tool.name,
+                "description": tool.description,
+                "category": tool.category,
+                "requires_api_key": tool.requires_api_key,
+                "parameters": [
+                    {
+                        "name": p.name,
+                        "type": p.type,
+                        "description": p.description,
+                        "required": p.required,
+                        "enum": p.enum,
+                    }
+                    for p in tool.parameters
+                ],
+            }
+            for tool in tools
+        ],
+        "total": len(tools),
+        "mock_mode": registry.mock_mode,
+    }
+
+
+@app.get("/tools/{category}")
+@monitor_performance(threshold_ms=100)
+def list_tools_by_category(category: str) -> Dict[str, Any]:
+    """List tools in a specific category."""
+    registry = get_tool_registry()
+    tools = registry.list_tools_by_category(category)
+    
+    if not tools:
+        raise HTTPException(status_code=404, detail=f"No tools found in category: {category}")
+    
+    return {
+        "category": category,
+        "tools": [
+            {
+                "name": tool.name,
+                "description": tool.description,
+                "requires_api_key": tool.requires_api_key,
+            }
+            for tool in tools
+        ],
+        "total": len(tools),
+    }
+
+
+class ScheduleAgentRequest(BaseModel):
+    frequency: str  # "daily", "weekly", "hourly", or cron expression
+
+
+@app.post("/agents/{agent_id}/schedule")
+@monitor_performance(threshold_ms=500)
+def schedule_agent(agent_id: str, request: ScheduleAgentRequest) -> Dict[str, Any]:
+    """Schedule an agent to run at specified frequency."""
+    agent = get_agent(agent_id)
+    if agent is None:
+        raise HTTPException(status_code=404, detail="Agent not found")
+    
+    scheduler = get_agent_scheduler()
+    
+    try:
+        # Define callback to run the agent
+        def agent_callback():
+            logger.info(f"Executing scheduled agent: {agent_id}")
+            run_agent(agent_id)
+        
+        job_id = scheduler.schedule_agent(agent_id, request.frequency, agent_callback)
+        
+        if not job_id:
+            raise HTTPException(status_code=400, detail="Failed to schedule agent")
+        
+        schedule = scheduler.get_schedule(agent_id)
+        return {
+            "agent_id": agent_id,
+            "status": "scheduled",
+            "frequency": request.frequency,
+            "job_id": job_id,
+            "next_run": str(schedule["next_run"]) if schedule else None,
+        }
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=f"Invalid frequency: {str(e)}")
+    except Exception as e:
+        logger.error(f"Failed to schedule agent {agent_id}: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Failed to schedule agent")
+
+
+@app.delete("/agents/{agent_id}/schedule")
+def unschedule_agent(agent_id: str) -> Dict[str, Any]:
+    """Remove scheduled execution for an agent."""
+    scheduler = get_agent_scheduler()
+    
+    if scheduler.remove_schedule(agent_id):
+        return {
+            "agent_id": agent_id,
+            "status": "unscheduled",
+        }
+    else:
+        raise HTTPException(status_code=404, detail="Agent not scheduled")
+
+
+@app.get("/schedules")
+@monitor_performance(threshold_ms=100)
+def list_schedules() -> Dict[str, Any]:
+    """List all scheduled agents."""
+    scheduler = get_agent_scheduler()
+    schedules = scheduler.list_schedules()
+    
+    return {
+        "schedules": [
+            {
+                "agent_id": agent_id,
+                "frequency": info["frequency"],
+                "next_run": str(info["next_run"]) if info["next_run"] else None,
+            }
+            for agent_id, info in schedules.items()
+        ],
+        "total": len(schedules),
+    }
+
+
+class StoreMemoryRequest(BaseModel):
+    key: str
+    value: Any
+    ttl_minutes: Optional[int] = None
+
+
+@app.post("/agents/{agent_id}/memory")
+def store_agent_memory(agent_id: str, request: StoreMemoryRequest) -> Dict[str, Any]:
+    """Store data in agent memory."""
+    memory_manager = get_memory_manager()
+    memory = memory_manager.get_memory(agent_id, "short_term")
+    
+    if memory.store(request.key, request.value, request.ttl_minutes):
+        return {
+            "agent_id": agent_id,
+            "key": request.key,
+            "status": "stored",
+        }
+    else:
+        raise HTTPException(status_code=500, detail="Failed to store memory")
+
+
+@app.get("/agents/{agent_id}/memory/{key}")
+def retrieve_agent_memory(agent_id: str, key: str) -> Dict[str, Any]:
+    """Retrieve data from agent memory."""
+    memory_manager = get_memory_manager()
+    memory = memory_manager.get_memory(agent_id, "short_term")
+    
+    value = memory.retrieve(key)
+    if value is not None:
+        return {
+            "agent_id": agent_id,
+            "key": key,
+            "value": value,
+        }
+    else:
+        raise HTTPException(status_code=404, detail=f"Memory key not found: {key}")
+
+
+@app.get("/agents/{agent_id}/memory")
+def list_agent_memory(agent_id: str) -> Dict[str, Any]:
+    """List all memory for an agent."""
+    memory_manager = get_memory_manager()
+    stats = memory_manager.get_stats(agent_id)
+    
+    return stats
+
+
+@app.delete("/agents/{agent_id}/memory")
+def clear_agent_memory(agent_id: str) -> Dict[str, Any]:
+    """Clear all memory for an agent."""
+    memory_manager = get_memory_manager()
+    memory_manager.clear_agent_memory(agent_id)
+    
+    return {
+        "agent_id": agent_id,
+        "status": "cleared",
     }

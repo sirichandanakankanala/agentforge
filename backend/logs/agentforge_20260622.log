@@ -1,0 +1,111 @@
+2026-06-22 16:24:46,278 - agentforge.main - INFO - startup_event:59 - Starting AgentForge backend...
+2026-06-22 16:24:46,280 - agentforge.tools - INFO - __init__:66 - ToolRegistry initialized in mock mode
+2026-06-22 16:24:46,280 - agentforge.tools - INFO - register:71 - Registered tool: web_search
+2026-06-22 16:24:46,280 - agentforge.tools - INFO - register:71 - Registered tool: notification_sender
+2026-06-22 16:24:46,280 - agentforge.tools - INFO - register:71 - Registered tool: summarizer
+2026-06-22 16:24:46,280 - agentforge.main - INFO - startup_event:66 - Registered 3 mock tools
+2026-06-22 16:24:46,284 - agentforge.scheduler - INFO - start:29 - Agent scheduler started
+2026-06-22 16:24:46,284 - agentforge.main - INFO - startup_event:71 - Agent scheduler started
+2026-06-22 16:24:46,284 - agentforge.main - INFO - startup_event:75 - Memory manager initialized
+2026-06-22 16:24:46,284 - agentforge.main - INFO - startup_event:77 - ✅ Backend startup complete
+2026-06-22 16:25:58,693 - agentforge.main - INFO - shutdown_event:83 - Shutting down AgentForge backend...
+2026-06-22 16:25:58,695 - agentforge.scheduler - INFO - stop:35 - Agent scheduler stopped
+2026-06-22 16:25:58,695 - agentforge.main - INFO - shutdown_event:86 - ✅ Backend shutdown complete
+2026-06-22 16:25:59,357 - agentforge.main - INFO - startup_event:59 - Starting AgentForge backend...
+2026-06-22 16:25:59,357 - agentforge.tools - INFO - __init__:66 - ToolRegistry initialized in mock mode
+2026-06-22 16:25:59,357 - agentforge.tools - INFO - register:71 - Registered tool: web_search
+2026-06-22 16:25:59,357 - agentforge.tools - INFO - register:71 - Registered tool: notification_sender
+2026-06-22 16:25:59,357 - agentforge.tools - INFO - register:71 - Registered tool: summarizer
+2026-06-22 16:25:59,357 - agentforge.main - INFO - startup_event:66 - Registered 3 mock tools
+2026-06-22 16:25:59,359 - agentforge.scheduler - INFO - start:29 - Agent scheduler started
+2026-06-22 16:25:59,359 - agentforge.main - INFO - startup_event:71 - Agent scheduler started
+2026-06-22 16:25:59,359 - agentforge.main - INFO - startup_event:75 - Memory manager initialized
+2026-06-22 16:25:59,359 - agentforge.main - INFO - startup_event:77 - ✅ Backend startup complete
+2026-06-22 16:26:41,230 - agentforge.main - INFO - shutdown_event:83 - Shutting down AgentForge backend...
+2026-06-22 16:26:41,233 - agentforge.scheduler - INFO - stop:35 - Agent scheduler stopped
+2026-06-22 16:26:41,234 - agentforge.main - INFO - shutdown_event:86 - ✅ Backend shutdown complete
+2026-06-22 16:26:44,906 - agentforge.main - INFO - startup_event:59 - Starting AgentForge backend...
+2026-06-22 16:26:44,906 - agentforge.tools - INFO - __init__:66 - ToolRegistry initialized in mock mode
+2026-06-22 16:26:44,906 - agentforge.tools - INFO - register:71 - Registered tool: web_search
+2026-06-22 16:26:44,906 - agentforge.tools - INFO - register:71 - Registered tool: notification_sender
+2026-06-22 16:26:44,907 - agentforge.tools - INFO - register:71 - Registered tool: summarizer
+2026-06-22 16:26:44,907 - agentforge.main - INFO - startup_event:66 - Registered 3 mock tools
+2026-06-22 16:26:44,908 - agentforge.scheduler - INFO - start:29 - Agent scheduler started
+2026-06-22 16:26:44,908 - agentforge.main - INFO - startup_event:71 - Agent scheduler started
+2026-06-22 16:26:44,908 - agentforge.main - INFO - startup_event:75 - Memory manager initialized
+2026-06-22 16:26:44,908 - agentforge.main - INFO - startup_event:77 - ✅ Backend startup complete
+2026-06-22 16:27:52,725 - agentforge.error_handler - DEBUG - sync_wrapper:139 - health took 0.15ms
+2026-06-22 16:39:13,502 - agentforge.main - INFO - startup_event:59 - Starting AgentForge backend...
+2026-06-22 16:39:13,503 - agentforge.tools - INFO - __init__:66 - ToolRegistry initialized in mock mode
+2026-06-22 16:39:13,503 - agentforge.tools - INFO - register:71 - Registered tool: web_search
+2026-06-22 16:39:13,503 - agentforge.tools - INFO - register:71 - Registered tool: notification_sender
+2026-06-22 16:39:13,503 - agentforge.tools - INFO - register:71 - Registered tool: summarizer
+2026-06-22 16:39:13,503 - agentforge.main - INFO - startup_event:66 - Registered 3 mock tools
+2026-06-22 16:39:13,505 - agentforge.scheduler - INFO - start:29 - Agent scheduler started
+2026-06-22 16:39:13,505 - agentforge.main - INFO - startup_event:71 - Agent scheduler started
+2026-06-22 16:39:13,505 - agentforge.main - INFO - startup_event:75 - Memory manager initialized
+2026-06-22 16:39:13,505 - agentforge.main - INFO - startup_event:77 - ✅ Backend startup complete
+2026-06-22 16:39:43,230 - agentforge.error_handler - DEBUG - sync_wrapper:139 - health took 0.06ms
+2026-06-22 16:39:43,230 - agentforge.error_handler - DEBUG - sync_wrapper:139 - health took 0.01ms
+2026-06-22 16:40:02,691 - agentforge.agent_runner - INFO - run_agent_blueprint:121 - Running agent: Create an agent that sends me daily AI news alerts (goal: Create an agent that sends me daily AI news alerts...)
+2026-06-22 16:40:02,692 - agentforge.agent_runner - INFO - run_agent_blueprint:122 - Mock mode: True, Tools: ['web_search', 'news_filter', 'ai_news_monitor', 'notification_sender', 'summarizer']
+2026-06-22 16:40:02,692 - agentforge.agent_runner - INFO - run_agent_blueprint:285 - Agent run completed: 22d98d0a-1028-4645-b24f-74cca23464f4
+2026-06-22 16:41:50,359 - agentforge.ws_manager - INFO - connect:19 - WebSocket connected: f885b55d-63f7-4355-aebd-27af18ca71d4 (total=1)
+2026-06-22 16:41:50,361 - agentforge.agent_runner - INFO - run_agent_blueprint:121 - Running agent: Create an agent that sends me daily AI news alerts (goal: Create an agent that sends me daily AI news alerts...)
+2026-06-22 16:41:50,361 - agentforge.agent_runner - INFO - run_agent_blueprint:122 - Mock mode: True, Tools: ['web_search', 'news_filter', 'ai_news_monitor', 'notification_sender', 'summarizer']
+2026-06-22 16:41:50,361 - agentforge.agent_runner - INFO - run_agent_blueprint:285 - Agent run completed: 598b1ee2-c31b-42dc-8637-e08830f83c69
+2026-06-22 16:41:50,368 - agentforge.ws_manager - INFO - disconnect:25 - WebSocket disconnected: f885b55d-63f7-4355-aebd-27af18ca71d4 (remaining=0)
+2026-06-22 16:42:02,271 - agentforge.error_handler - DEBUG - sync_wrapper:139 - health took 0.11ms
+2026-06-22 16:42:31,975 - agentforge.main - INFO - shutdown_event:83 - Shutting down AgentForge backend...
+2026-06-22 16:42:31,979 - agentforge.scheduler - INFO - stop:35 - Agent scheduler stopped
+2026-06-22 16:42:31,980 - agentforge.main - INFO - shutdown_event:86 - ✅ Backend shutdown complete
+2026-06-22 16:42:32,752 - agentforge.main - INFO - startup_event:59 - Starting AgentForge backend...
+2026-06-22 16:42:32,752 - agentforge.tools - INFO - __init__:66 - ToolRegistry initialized in mock mode
+2026-06-22 16:42:32,752 - agentforge.tools - INFO - register:71 - Registered tool: web_search
+2026-06-22 16:42:32,752 - agentforge.tools - INFO - register:71 - Registered tool: notification_sender
+2026-06-22 16:42:32,752 - agentforge.tools - INFO - register:71 - Registered tool: summarizer
+2026-06-22 16:42:32,752 - agentforge.main - INFO - startup_event:66 - Registered 3 mock tools
+2026-06-22 16:42:32,754 - agentforge.scheduler - INFO - start:29 - Agent scheduler started
+2026-06-22 16:42:32,754 - agentforge.main - INFO - startup_event:71 - Agent scheduler started
+2026-06-22 16:42:32,754 - agentforge.main - INFO - startup_event:75 - Memory manager initialized
+2026-06-22 16:42:32,754 - agentforge.main - INFO - startup_event:77 - ✅ Backend startup complete
+2026-06-22 16:42:34,573 - agentforge.main - INFO - shutdown_event:83 - Shutting down AgentForge backend...
+2026-06-22 16:42:34,574 - agentforge.scheduler - INFO - stop:35 - Agent scheduler stopped
+2026-06-22 16:42:34,574 - agentforge.main - INFO - shutdown_event:86 - ✅ Backend shutdown complete
+2026-06-22 16:42:34,943 - agentforge.main - INFO - startup_event:59 - Starting AgentForge backend...
+2026-06-22 16:42:34,943 - agentforge.tools - INFO - __init__:66 - ToolRegistry initialized in mock mode
+2026-06-22 16:42:34,943 - agentforge.tools - INFO - register:71 - Registered tool: web_search
+2026-06-22 16:42:34,943 - agentforge.tools - INFO - register:71 - Registered tool: notification_sender
+2026-06-22 16:42:34,943 - agentforge.tools - INFO - register:71 - Registered tool: summarizer
+2026-06-22 16:42:34,943 - agentforge.main - INFO - startup_event:66 - Registered 3 mock tools
+2026-06-22 16:42:34,944 - agentforge.scheduler - INFO - start:29 - Agent scheduler started
+2026-06-22 16:42:34,944 - agentforge.main - INFO - startup_event:71 - Agent scheduler started
+2026-06-22 16:42:34,944 - agentforge.main - INFO - startup_event:75 - Memory manager initialized
+2026-06-22 16:42:34,944 - agentforge.main - INFO - startup_event:77 - ✅ Backend startup complete
+2026-06-22 16:44:40,204 - agentforge.main - INFO - startup_event:59 - Starting AgentForge backend...
+2026-06-22 16:44:40,205 - agentforge.tools - INFO - __init__:66 - ToolRegistry initialized in mock mode
+2026-06-22 16:44:40,205 - agentforge.tools - INFO - register:71 - Registered tool: web_search
+2026-06-22 16:44:40,205 - agentforge.tools - INFO - register:71 - Registered tool: notification_sender
+2026-06-22 16:44:40,205 - agentforge.tools - INFO - register:71 - Registered tool: summarizer
+2026-06-22 16:44:40,205 - agentforge.main - INFO - startup_event:66 - Registered 3 mock tools
+2026-06-22 16:44:40,207 - agentforge.scheduler - INFO - start:29 - Agent scheduler started
+2026-06-22 16:44:40,207 - agentforge.main - INFO - startup_event:71 - Agent scheduler started
+2026-06-22 16:44:40,207 - agentforge.main - INFO - startup_event:75 - Memory manager initialized
+2026-06-22 16:44:40,207 - agentforge.main - INFO - startup_event:77 - ✅ Backend startup complete
+2026-06-22 16:52:35,233 - agentforge.main - INFO - startup_event:59 - Starting AgentForge backend...
+2026-06-22 16:52:35,234 - agentforge.tools - INFO - __init__:66 - ToolRegistry initialized in mock mode
+2026-06-22 16:52:35,234 - agentforge.tools - INFO - register:71 - Registered tool: web_search
+2026-06-22 16:52:35,234 - agentforge.tools - INFO - register:71 - Registered tool: notification_sender
+2026-06-22 16:52:35,234 - agentforge.tools - INFO - register:71 - Registered tool: summarizer
+2026-06-22 16:52:35,234 - agentforge.main - INFO - startup_event:66 - Registered 3 mock tools
+2026-06-22 16:52:35,235 - agentforge.scheduler - INFO - start:29 - Agent scheduler started
+2026-06-22 16:52:35,235 - agentforge.main - INFO - startup_event:71 - Agent scheduler started
+2026-06-22 16:52:35,235 - agentforge.main - INFO - startup_event:75 - Memory manager initialized
+2026-06-22 16:52:35,235 - agentforge.main - INFO - startup_event:77 - ✅ Backend startup complete
+2026-06-22 16:52:43,573 - agentforge.ws_manager - INFO - connect:19 - WebSocket connected: f885b55d-63f7-4355-aebd-27af18ca71d4 (total=1)
+2026-06-22 16:52:43,575 - agentforge.agent_runner - INFO - run_agent_blueprint:121 - Running agent: Create an agent that sends me daily AI news alerts (goal: Create an agent that sends me daily AI news alerts...)
+2026-06-22 16:52:43,575 - agentforge.agent_runner - INFO - run_agent_blueprint:122 - Mock mode: True, Tools: ['web_search', 'news_filter', 'ai_news_monitor', 'notification_sender', 'summarizer']
+2026-06-22 16:52:43,575 - agentforge.agent_runner - INFO - run_agent_blueprint:285 - Agent run completed: 085d80b3-1a40-4fd5-aaa9-5f0afa326b70
+2026-06-22 16:52:43,576 - agentforge.ws_manager - INFO - disconnect:25 - WebSocket disconnected: f885b55d-63f7-4355-aebd-27af18ca71d4 (remaining=0)
+2026-06-22 16:54:38,784 - agentforge.error_handler - DEBUG - sync_wrapper:139 - health took 0.20ms
+2026-06-22 16:54:38,791 - agentforge.error_handler - DEBUG - sync_wrapper:139 - health took 0.01ms
